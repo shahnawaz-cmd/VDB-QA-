@@ -98,6 +98,40 @@ export class DownloadsPage extends BasePage {
     await this.purchaseDialog.waitFor({ state: 'hidden' });
   }
 
+  async proceedToStripeCheckout(email: string): Promise<void> {
+    await this.purchaseEmailInput.fill(email);
+    await Promise.all([
+      this.page.waitForURL(/checkout\.stripe\.com/, {
+        timeout: 30000,
+        waitUntil: 'domcontentloaded',
+      }),
+      this.purchaseContinueBtn.click(),
+    ]);
+  }
+
+  async fillStripeCardAndPay(card = {
+    number: '4242 4242 4242 4242',
+    expiry: '12/28',
+    cvc: '123',
+    name: 'QA Test Buyer',
+  }): Promise<void> {
+    const cardInput = this.page.locator('input#cardNumber');
+    await cardInput.waitFor({ state: 'visible', timeout: 20000 });
+    await cardInput.fill(card.number);
+    await this.page.locator('input#cardExpiry').fill(card.expiry);
+    await this.page.locator('input#cardCvc').fill(card.cvc);
+    await this.page.locator('input#billingName').fill(card.name);
+
+    const payBtn = this.page.locator('button[type="submit"], button:has-text("Pay")').first();
+    await Promise.all([
+      this.page.waitForURL(/\/downloads\/success/, {
+        timeout: 30000,
+        waitUntil: 'domcontentloaded',
+      }),
+      payBtn.click(),
+    ]);
+  }
+
   async openQuoteModal(index = 0): Promise<void> {
     await this.customPricingButtons.nth(index).click();
     await this.quoteDialog.waitFor({ state: 'visible' });

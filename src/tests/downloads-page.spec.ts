@@ -209,4 +209,76 @@ test.describe('Automotive Databases Downloads Page Checks', () => {
     ProofHelper.logVerified('Button text toggled back to "Show more"');
   });
 
+  test('Verify clicking Continue to Payment launches Stripe Checkout with product and price @downloads @checkout @e2e @regression', async ({
+    downloadsPage,
+    page,
+  }, testInfo) => {
+    test.slow();
+    ProofHelper.logStep('Opening Downloads page');
+    await downloadsPage.openDownloads();
+
+    ProofHelper.logStep('Opening Buy Now modal on first database card');
+    await downloadsPage.openBuyModal(0);
+    await expect(downloadsPage.purchaseDialog).toBeVisible();
+
+    ProofHelper.logStep('Filling email and proceeding to Stripe Checkout');
+    await downloadsPage.proceedToStripeCheckout('buyer.checkout@vehicledatabases.com');
+
+    ProofHelper.logStep('Verifying redirection to checkout.stripe.com');
+    expect(page.url()).toContain('checkout.stripe.com');
+    ProofHelper.logVerified(`Successfully redirected to secure Stripe Checkout: ${page.url().slice(0, 60)}...`);
+
+    ProofHelper.logStep('Verifying product details and price on Stripe Checkout page');
+    await expect(page.locator('body')).toContainText('Vehicle Year/Make/Model Specs — Basic', { timeout: 15000 });
+    await expect(page.locator('body')).toContainText('$6,400', { timeout: 15000 });
+    ProofHelper.logVerified('Found product name and $6,400 price on Stripe Checkout page');
+
+    await ProofHelper.captureProof(page, testInfo, 'downloads-stripe-checkout-loaded', 'Stripe Hosted Checkout Page');
+  });
+
+  test('Complete full purchase flow on Stripe and verify download access on success page @downloads @purchase @checkout @e2e @regression', async ({
+    downloadsPage,
+    page,
+  }, testInfo) => {
+    test.slow();
+    ProofHelper.logStep('Opening Downloads page');
+    await downloadsPage.openDownloads();
+
+    ProofHelper.logStep('Opening Buy Now modal on first database card');
+    await downloadsPage.openBuyModal(0);
+    await expect(downloadsPage.purchaseDialog).toBeVisible();
+
+    ProofHelper.logStep('Proceeding to Stripe Checkout session');
+    const buyerEmail = 'procurement.qa@vehicledatabases.com';
+    await downloadsPage.proceedToStripeCheckout(buyerEmail);
+    expect(page.url()).toContain('checkout.stripe.com');
+    ProofHelper.logVerified('Landed on Stripe Checkout session');
+
+    ProofHelper.logStep('Filling Stripe test card details and completing payment');
+    await downloadsPage.fillStripeCardAndPay({
+      number: '4242 4242 4242 4242',
+      expiry: '12/28',
+      cvc: '123',
+      name: 'QA Executive Buyer',
+    });
+
+    ProofHelper.logStep('Verifying redirection to post-purchase success page');
+    expect(page.url()).toContain('/downloads/success');
+    expect(page.url()).toContain('session_id=');
+    ProofHelper.logVerified(`Successfully redirected to success page: ${page.url().slice(0, 70)}...`);
+
+    ProofHelper.logStep('Verifying order confirmation, product name, and buyer email');
+    await expect(page.locator('h1')).toContainText('Purchase Successful!');
+    await expect(page.locator('body')).toContainText('Vehicle Year/Make/Model Specs — Basic');
+    await expect(page.locator('body')).toContainText(buyerEmail);
+    ProofHelper.logVerified('Order confirmed with product name and matching email');
+
+    ProofHelper.logStep('Verifying data download buttons on success page');
+    await expect(page.locator('button:has-text("JSON FORMAT")')).toBeVisible();
+    await expect(page.locator('button:has-text("NO-SQL FORMAT")')).toBeVisible();
+    ProofHelper.logVerified('Data download buttons (JSON & NO-SQL) are unlocked and ready');
+
+    await ProofHelper.captureProof(page, testInfo, 'downloads-purchase-success-page', 'Post-Purchase Data Access Confirmation Page');
+  });
+
 });
