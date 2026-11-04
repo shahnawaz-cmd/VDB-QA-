@@ -4,3 +4,4 @@ export * from './ContactDemoPage';
 export * from './PortalAuthPage';
 export * from './DocsPage';
 export * from './VinDecoderPage';
+export * from './DownloadsPage';

@@ -5,6 +5,7 @@ import {
   PortalAuthPage,
   DocsPage,
   VinDecoderPage,
+  DownloadsPage,
 } from '../pages';
 
 type VdbFixtures = {
@@ -13,6 +14,7 @@ type VdbFixtures = {
   portalAuth: PortalAuthPage;
   docsPage: DocsPage;
   vinDecoder: VinDecoderPage;
+  downloadsPage: DownloadsPage;
   consoleErrors: string[];
 };
 
@@ -48,6 +50,10 @@ export const test = base.extend<VdbFixtures>({
 
   vinDecoder: async ({ page }, use) => {
     await use(new VinDecoderPage(page));
+  },
+
+  downloadsPage: async ({ page }, use) => {
+    await use(new DownloadsPage(page));
   },
 });
 

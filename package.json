@@ -12,6 +12,7 @@
     "test:faq": "playwright test --grep \"@faq\"",
     "test:interactive": "playwright test --grep \"@interactive\"",
     "test:coverage": "playwright test --grep \"@coverage\"",
+    "test:downloads": "playwright test --grep \"@downloads\"",
     "test:nonfunctional": "playwright test --grep \"@nonfunctional\"",
     "test:regression": "playwright test --grep \"@regression\"",
     "test:headed": "playwright test --headed",
