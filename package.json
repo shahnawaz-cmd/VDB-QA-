@@ -15,6 +15,7 @@
     "test:downloads": "playwright test --grep \"@downloads\"",
     "test:sitemap": "playwright test --grep \"@sitemap\"",
     "test:dark": "playwright test --grep \"@dark\"",
+    "test:translation": "playwright test --grep \"@translation\"",
     "test:mobile-overflow": "playwright test --grep \"@overflow\"",
     "test:mobile": "playwright test --grep \"@mobile\"",
     "test:all:dark": "playwright test --project=desktop-dark",
