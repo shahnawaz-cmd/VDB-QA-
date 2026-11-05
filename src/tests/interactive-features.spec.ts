@@ -164,45 +164,46 @@ test.describe('Website Interactive Features Checks', () => {
     const initialTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
     ProofHelper.logVerified(`Initial website theme: ${initialTheme}`);
 
-    // Click to toggle theme to dark
-    ProofHelper.logStep('Clicking theme toggle button');
+    // Click to toggle theme to opposite
+    const expectedOpposite = initialTheme === 'dark' ? 'light' : 'dark';
+    ProofHelper.logStep(`Clicking theme toggle button to switch to ${expectedOpposite}`);
     await themeButton.click();
     await page.waitForTimeout(600);
 
     const toggledTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
-    expect(toggledTheme).toBe('dark');
-    ProofHelper.logVerified('Theme successfully changed to: dark');
+    expect(toggledTheme).toBe(expectedOpposite);
+    ProofHelper.logVerified(`Theme successfully changed to: ${expectedOpposite}`);
 
     // Verify localStorage persistence
     const savedTheme = await page.evaluate(() => localStorage.getItem('theme'));
-    expect(savedTheme).toBe('dark');
-    ProofHelper.logVerified('Dark mode preference saved in browser localStorage');
+    expect(savedTheme).toBe(expectedOpposite);
+    ProofHelper.logVerified(`${expectedOpposite} mode preference saved in browser localStorage`);
 
-    await ProofHelper.captureProof(page, testInfo, 'interactive-theme-toggled-dark', 'Website dark theme active');
+    await ProofHelper.captureProof(page, testInfo, `interactive-theme-toggled-${expectedOpposite}`, `Website ${expectedOpposite} theme active`);
 
     // Verify cross-page navigation persistence
-    ProofHelper.logStep('Navigating to /downloads to check dark mode persistence across pages');
+    ProofHelper.logStep(`Navigating to /downloads to check ${expectedOpposite} theme persistence across pages`);
     await page.goto('/downloads', { waitUntil: 'domcontentloaded', timeout: 35000 });
     const themeOnNewPage = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-    expect(themeOnNewPage).toBe('dark');
-    ProofHelper.logVerified('Dark theme persisted across page navigation to /downloads');
+    expect(themeOnNewPage).toBe(expectedOpposite);
+    ProofHelper.logVerified(`${expectedOpposite} theme persisted across page navigation to /downloads`);
 
     // Verify page reload persistence
     ProofHelper.logStep('Reloading page to verify persistence after browser refresh');
     await page.reload({ waitUntil: 'domcontentloaded' });
     const themeAfterReload = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-    expect(themeAfterReload).toBe('dark');
-    ProofHelper.logVerified('Dark theme persisted after page reload');
+    expect(themeAfterReload).toBe(expectedOpposite);
+    ProofHelper.logVerified(`${expectedOpposite} theme persisted after page reload`);
 
-    // Click again to restore light theme
-    ProofHelper.logStep('Clicking theme toggle button again to restore light theme');
+    // Click again to restore original theme
+    ProofHelper.logStep(`Clicking theme toggle button again to restore ${initialTheme} theme`);
     const downloadsThemeBtn = page.locator('button:has(span.sr-only:has-text("Switch to dark mode")), button:has(span.sr-only:has-text("Switch to light mode"))').first();
     await downloadsThemeBtn.click();
     await page.waitForTimeout(600);
 
     const restoredTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
-    expect(restoredTheme).toBe('light');
-    ProofHelper.logVerified('Theme restored cleanly to: light');
+    expect(restoredTheme).toBe(initialTheme);
+    ProofHelper.logVerified(`Theme restored cleanly to: ${initialTheme}`);
   });
 
   test('Search documentation in docs search box', { tag: ['@interactive', '@docs', '@regression'] }, async ({ page }, testInfo) => {
