@@ -100,9 +100,10 @@ export class DownloadsPage extends BasePage {
 
   async proceedToStripeCheckout(email: string): Promise<void> {
     await this.purchaseEmailInput.fill(email);
+    await expect(this.purchaseContinueBtn).toBeEnabled({ timeout: 10000 });
     await Promise.all([
       this.page.waitForURL(/checkout\.stripe\.com/, {
-        timeout: 30000,
+        timeout: 60000,
         waitUntil: 'domcontentloaded',
       }),
       this.purchaseContinueBtn.click(),

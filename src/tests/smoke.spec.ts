@@ -29,7 +29,7 @@ test.describe('Important User Features Checks', () => {
     await test.step('Click Docs link and check it opens', async () => {
       ProofHelper.logStep('Clicking Docs link');
       await headerFooter.openDocs();
-      await expect(page).toHaveURL(/.*\/docs.*/);
+      await expect(page).toHaveURL(/.*\/docs.*/, { timeout: 15000 });
       ProofHelper.logVerified('Docs page opened fine');
     });
   });

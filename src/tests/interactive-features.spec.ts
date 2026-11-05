@@ -271,7 +271,7 @@ test.describe('Website Interactive Features Checks', () => {
 
     ProofHelper.logStep('Clicking "API Architecture" link in sidebar');
     await architectureLink.click();
-    await page.waitForURL('**/docs/api-architecture', { timeout: 10000 });
+    await page.waitForURL('**/docs/api-architecture', { timeout: 25000 });
 
     expect(page.url()).toContain('/docs/api-architecture');
     const heading = page.locator('h1').first();

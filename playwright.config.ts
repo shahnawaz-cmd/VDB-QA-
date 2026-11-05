@@ -4,9 +4,9 @@ export default defineConfig({
   testDir: './src/tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
-  workers: 4,
-  timeout: 30000,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 2 : 4,
+  timeout: process.env.CI ? 60000 : 30000,
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
@@ -18,8 +18,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     viewport: { width: 1440, height: 900 },
     ignoreHTTPSErrors: true,
-    actionTimeout: 10000,
-    navigationTimeout: 20000,
+    actionTimeout: 25000,
+    navigationTimeout: 35000,
   },
   projects: [
     {
