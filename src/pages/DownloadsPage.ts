@@ -114,18 +114,44 @@ export class DownloadsPage extends BasePage {
     expiry: '12/28',
     cvc: '123',
     name: 'QA Test Buyer',
+    zip: '90210',
+    phone: '2015550123',
   }): Promise<void> {
-    const cardInput = this.page.locator('input#cardNumber');
-    await cardInput.waitFor({ state: 'visible', timeout: 20000 });
+    const cardInput = this.page.locator('input#cardNumber, input[name="cardNumber"]');
+    await cardInput.waitFor({ state: 'visible', timeout: 25000 });
     await cardInput.fill(card.number);
-    await this.page.locator('input#cardExpiry').fill(card.expiry);
-    await this.page.locator('input#cardCvc').fill(card.cvc);
-    await this.page.locator('input#billingName').fill(card.name);
+    await this.page.locator('input#cardExpiry, input[name="cardExpiry"]').fill(card.expiry);
+    await this.page.locator('input#cardCvc, input[name="cardCvc"]').fill(card.cvc);
+
+    const billingNameInput = this.page.locator('input#billingName, input[name="billingName"]');
+    if (await billingNameInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await billingNameInput.fill(card.name);
+    }
+
+    // Fill ZIP / Postal Code if present (Stripe mandates this when Country is United States)
+    const zipInput = this.page.locator('input#billingPostalCode, input[name="postalCode"], input[placeholder="ZIP"], input[autocomplete="postal-code"]');
+    if (await zipInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await zipInput.fill(card.zip || '90210');
+    }
+
+    // Uncheck "Save my information with Link" checkbox if auto-checked by Stripe
+    const linkCheckbox = this.page.getByRole('checkbox', { name: /Save my information with Link/i });
+    if (await linkCheckbox.isVisible({ timeout: 1500 }).catch(() => false)) {
+      if (await linkCheckbox.isChecked()) {
+        await linkCheckbox.uncheck();
+      }
+    }
+
+    // In case phone number input is required by Link/Stripe
+    const phoneInput = this.page.locator('input#phoneNumber, input[type="tel"], input[name="phone"]');
+    if (await phoneInput.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await phoneInput.fill(card.phone || '2015550123');
+    }
 
     const payBtn = this.page.locator('button[type="submit"], button:has-text("Pay")').first();
     await Promise.all([
       this.page.waitForURL(/\/downloads\/success/, {
-        timeout: 30000,
+        timeout: 60000,
         waitUntil: 'domcontentloaded',
       }),
       payBtn.click(),
