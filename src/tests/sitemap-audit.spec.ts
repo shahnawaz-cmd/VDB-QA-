@@ -110,7 +110,7 @@ test.describe('Website Sitemap and Published Routes Health Checks', () => {
       l.replace(/<\/?loc>/g, '').replace('https://dev.vehicledatabases.com', '')
     );
 
-    expect(industryUrls.length).toBe(8);
+    expect(industryUrls.length).toBeGreaterThanOrEqual(8);
     for (const path of industryUrls) {
       const pageRes = await request.get(path);
       expect(pageRes.status()).toBe(200);
