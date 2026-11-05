@@ -1,0 +1,71 @@
+name: Playwright Tests & GitHub Pages Report
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Run Playwright tests
+      run: npm test
+      continue-on-error: true
+
+    - name: Prepare report for GitHub Pages
+      if: always()
+      run: |
+        mkdir -p docs
+        if [ -d "playwright-report" ]; then
+          cp -r playwright-report/* docs/
+        fi
+        touch docs/.nojekyll
+
+    - name: Upload Playwright Report Artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+
+    - name: Setup Pages
+      if: always()
+      uses: actions/configure-pages@v5
+
+    - name: Upload Pages Artifact
+      if: always()
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      if: always()
+      uses: actions/deploy-pages@v4
