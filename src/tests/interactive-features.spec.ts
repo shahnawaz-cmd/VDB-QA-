@@ -173,11 +173,31 @@ test.describe('Website Interactive Features Checks', () => {
     expect(toggledTheme).toBe('dark');
     ProofHelper.logVerified('Theme successfully changed to: dark');
 
+    // Verify localStorage persistence
+    const savedTheme = await page.evaluate(() => localStorage.getItem('theme'));
+    expect(savedTheme).toBe('dark');
+    ProofHelper.logVerified('Dark mode preference saved in browser localStorage');
+
     await ProofHelper.captureProof(page, testInfo, 'interactive-theme-toggled-dark', 'Website dark theme active');
+
+    // Verify cross-page navigation persistence
+    ProofHelper.logStep('Navigating to /downloads to check dark mode persistence across pages');
+    await page.goto('/downloads', { waitUntil: 'domcontentloaded', timeout: 35000 });
+    const themeOnNewPage = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    expect(themeOnNewPage).toBe('dark');
+    ProofHelper.logVerified('Dark theme persisted across page navigation to /downloads');
+
+    // Verify page reload persistence
+    ProofHelper.logStep('Reloading page to verify persistence after browser refresh');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    const themeAfterReload = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    expect(themeAfterReload).toBe('dark');
+    ProofHelper.logVerified('Dark theme persisted after page reload');
 
     // Click again to restore light theme
     ProofHelper.logStep('Clicking theme toggle button again to restore light theme');
-    await themeButton.click();
+    const downloadsThemeBtn = page.locator('button:has(span.sr-only:has-text("Switch to dark mode")), button:has(span.sr-only:has-text("Switch to light mode"))').first();
+    await downloadsThemeBtn.click();
     await page.waitForTimeout(600);
 
     const restoredTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
