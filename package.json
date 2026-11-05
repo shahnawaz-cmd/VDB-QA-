@@ -14,6 +14,8 @@
     "test:coverage": "playwright test --grep \"@coverage\"",
     "test:downloads": "playwright test --grep \"@downloads\"",
     "test:sitemap": "playwright test --grep \"@sitemap\"",
+    "test:dark": "playwright test --grep \"@dark\"",
+    "test:all:dark": "playwright test --project=desktop-dark",
     "test:nonfunctional": "playwright test --grep \"@nonfunctional\"",
     "test:regression": "playwright test --grep \"@regression\"",
     "test:headed": "playwright test --headed",
